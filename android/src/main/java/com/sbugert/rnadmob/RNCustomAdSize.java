@@ -1,6 +1,6 @@
 package com.sbugert.rnadmob;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.google.android.gms.ads.AdSize;
 
