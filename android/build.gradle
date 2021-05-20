@@ -1,11 +1,21 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:4.2.1'
+    }
+}
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 30
 
     defaultConfig {
         minSdkVersion 22
-        targetSdkVersion 28
+        targetSdkVersion 30
     }
     buildTypes {
         release {
@@ -13,11 +23,24 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
-    implementation 'com.facebook.react:react-native:+'
-    implementation 'com.google.android.gms:play-services-ads:+'
-    implementation 'com.jakewharton.timber:timber:4.7.0'
-    testImplementation "junit:junit:4.12"
+    implementation 'com.facebook.react:react-native:0.60.5'
+    implementation 'com.google.android.gms:play-services-ads:20.1.0'
+    implementation 'com.jakewharton.timber:timber:4.7.1'
+    testImplementation "junit:junit:4.13.1"
+}
+repositories {
+    maven {
+        // All of React Native (JS, Android binaries) is installed from npm
+        url "../node_modules/react-native/android"
+    }
+    google()
+    mavenCentral()
+
 }

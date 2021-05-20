@@ -1,6 +1,8 @@
 package com.sbugert.rnadmob;
 
 import android.content.Context;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import android.view.View;
 
@@ -20,6 +22,9 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.LoadAdError;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -56,9 +61,10 @@ class ReactAdView extends ReactViewGroup {
             }
 
             @Override
-            public void onAdFailedToLoad(int errorCode) {
+            public void onAdFailedToLoad(@NonNull @NotNull LoadAdError loadAdError) {
+                super.onAdFailedToLoad(loadAdError);
                 String errorMessage = "Unknown error";
-                switch (errorCode) {
+                switch (loadAdError.getCode()) {
                     case AdRequest.ERROR_CODE_INTERNAL_ERROR:
                         errorMessage = "Internal error, an invalid response was received from the ad server.";
                         break;
@@ -89,10 +95,8 @@ class ReactAdView extends ReactViewGroup {
                 sendEvent(RNAdMobBannerViewManager.EVENT_AD_CLOSED, null);
             }
 
-            @Override
-            public void onAdLeftApplication() {
-                sendEvent(RNAdMobBannerViewManager.EVENT_AD_LEFT_APPLICATION, null);
-            }
+            //TODO: sendEvent(RNAdMobBannerViewManager.EVENT_AD_LEFT_APPLICATION, null);
+
         });
         this.addView(this.adView);
     }
@@ -125,15 +129,7 @@ class ReactAdView extends ReactViewGroup {
 
     public void loadBanner() {
         AdRequest.Builder adRequestBuilder = new AdRequest.Builder();
-        if (testDevices != null) {
-            for (int i = 0; i < testDevices.length; i++) {
-                String testDevice = testDevices[i];
-                if (testDevice == "SIMULATOR") {
-                    testDevice = AdRequest.DEVICE_ID_EMULATOR;
-                }
-                adRequestBuilder.addTestDevice(testDevice);
-            }
-        }
+
         AdRequest adRequest = adRequestBuilder.build();
         this.adView.loadAd(adRequest);
     }
@@ -223,8 +219,11 @@ public class RNAdMobBannerViewManager extends ViewGroupManager<ReactAdView> {
     @ReactProp(name = PROP_TEST_DEVICES)
     public void setPropTestDevices(final ReactAdView view, final ReadableArray testDevices) {
         ReadableNativeArray nativeArray = (ReadableNativeArray)testDevices;
-        ArrayList<Object> list = nativeArray.toArrayList();
-        view.setTestDevices(list.toArray(new String[list.size()]));
+        String[] list = new String[testDevices.size()];
+        for (int i = 0; i < testDevices.size(); i++) {
+            list[i] = (testDevices.getString(i));
+        }
+        view.setTestDevices(list);
     }
 
     private AdSize getAdSizeFromString(String adSize) {
