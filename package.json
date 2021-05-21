@@ -10,14 +10,15 @@
     "url": "git@github.com:sbugert/react-native-admob.git"
   },
   "dependencies": {
-    "prop-types": "^15.5.10"
+    "prop-types": "15.7.2"
   },
   "peerDependencies": {
-    "react-native": ">=0.60.5"
+    "react-native": "0.64.1"
   },
   "devDependencies": {
-    "babel-eslint": "^7.2.3",
-    "eslint": "^4.3.0",
-    "eslint-plugin-react": "^7.1.0"
+    "@babel/eslint-parser": "7.14.3",
+    "@babel/core": "7.14.3",
+    "eslint": "7.26.0",
+    "eslint-plugin-react": "7.23.2"
   }
 }
