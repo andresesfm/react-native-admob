@@ -39,7 +39,6 @@ class ReactPublisherAdView extends ReactViewGroup {
 
     protected AdManagerAdView adView;
 
-    String[] testDevices;
     AdSize[] validAdSizes;
     String adUnitID;
     AdSize adSize;
@@ -169,15 +168,7 @@ class ReactPublisherAdView extends ReactViewGroup {
         this.adView.setAdSizes(adSizesArray);
 
         AdManagerAdRequest.Builder adRequestBuilder = new AdManagerAdRequest.Builder();
-        if (testDevices != null) {
-            for (String device : testDevices) {
-                String testDevice = device;
-                if (testDevice.equals("SIMULATOR")) {
-                    testDevice = AdManagerAdRequest.DEVICE_ID_EMULATOR;
-                }
-                //TODO: adRequestBuilder.addTestDevice(testDevice);
-            }
-        }
+
         if (customTargeting != null) {
             for (String key : customTargeting.keySet()) {
                 adRequestBuilder.addCustomTargeting(key, String.valueOf(customTargeting.get(key)));
@@ -195,10 +186,6 @@ class ReactPublisherAdView extends ReactViewGroup {
         }
         this.adUnitID = adUnitID;
         this.adView.setAdUnitId(adUnitID);
-    }
-
-    public void setTestDevices(String[] testDevices) {
-        this.testDevices = testDevices;
     }
 
     public void setAdSize(AdSize adSize) {
@@ -299,10 +286,7 @@ public class RNPublisherBannerViewManager extends ViewGroupManager<ReactPublishe
 
     @ReactProp(name = PROP_TEST_DEVICES)
     public void setPropTestDevices(final ReactPublisherAdView view, final ReadableArray testDevices) {
-        Timber.v("setPropTestDevices for view " + view.hashCode() + ": " + testDevices);
-        ReadableNativeArray nativeArray = (ReadableNativeArray) testDevices;
-        ArrayList<Object> list = nativeArray.toArrayList();
-        view.setTestDevices(list.toArray(new String[list.size()]));
+        TestDevices.set(testDevices);
     }
 
     @ReactProp(name = PROP_CUSTOM_TARGETING)

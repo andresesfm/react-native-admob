@@ -152,19 +152,7 @@ public class RNAdMobRewardedVideoAdModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void setTestDevices(ReadableArray testDevicesArray) {
-        ReadableNativeArray nativeArray = (ReadableNativeArray)testDevicesArray;
-        ArrayList<String> testDevices  =new ArrayList<>();
-        for (int i = 0; i < nativeArray.size(); i++) {
-            String testDevice = testDevicesArray.getString(i);;
-            if (testDevice.equals("EMULATOR") || testDevice.equals("SIMULATOR")) {
-                testDevice = AdRequest.DEVICE_ID_EMULATOR;
-            }
-            testDevices.add(testDevice);
-        }
-
-        RequestConfiguration configuration =
-            new RequestConfiguration.Builder().setTestDeviceIds(testDevices).build();
-        MobileAds.setRequestConfiguration(configuration);
+        TestDevices.set(testDevicesArray);
     }
 
     @ReactMethod

@@ -149,6 +149,7 @@ export default class Example extends Component {
               adSize="banner"
               validAdSizes={['banner', 'largeBanner', 'mediumRectangle']}
               adUnitID="/6499/example/APIDemo/AdSizes"
+              testDevices={[AdMobRewarded.simulatorId]}
               ref={el => (this._adSizesExample = el)}
             />
             <Button

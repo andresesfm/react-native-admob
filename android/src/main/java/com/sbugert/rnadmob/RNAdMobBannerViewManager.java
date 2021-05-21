@@ -34,7 +34,6 @@ class ReactAdView extends ReactViewGroup {
     protected AdView adView;
 
     String adUnitID;
-    String[] testDevices;
     AdSize adSize;
 
     public ReactAdView(final Context context) {
@@ -144,10 +143,6 @@ class ReactAdView extends ReactViewGroup {
         this.adView.setAdUnitId(adUnitID);
     }
 
-    public void setTestDevices(String[] testDevices) {
-        this.testDevices = testDevices;
-    }
-
     public void setAdSize(AdSize adSize) {
         this.adSize = adSize;
         this.adView.setAdSize(adSize);
@@ -218,12 +213,7 @@ public class RNAdMobBannerViewManager extends ViewGroupManager<ReactAdView> {
 
     @ReactProp(name = PROP_TEST_DEVICES)
     public void setPropTestDevices(final ReactAdView view, final ReadableArray testDevices) {
-        ReadableNativeArray nativeArray = (ReadableNativeArray)testDevices;
-        String[] list = new String[testDevices.size()];
-        for (int i = 0; i < testDevices.size(); i++) {
-            list[i] = (testDevices.getString(i));
-        }
-        view.setTestDevices(list);
+        TestDevices.set(testDevices);
     }
 
     private AdSize getAdSizeFromString(String adSize) {
