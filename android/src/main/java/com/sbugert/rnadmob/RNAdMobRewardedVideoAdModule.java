@@ -23,8 +23,6 @@ import com.google.android.gms.ads.OnUserEarnedRewardListener;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 
-import org.jetbrains.annotations.NotNull;
-
 public class RNAdMobRewardedVideoAdModule extends ReactContextBaseJavaModule {
 
     public static final String REACT_CLASS = "RNAdMobRewarded";
@@ -43,7 +41,7 @@ public class RNAdMobRewardedVideoAdModule extends ReactContextBaseJavaModule {
     boolean isLoaded = false;
     RewardedAdLoadCallback rewardedAdLoadCallback = new RewardedAdLoadCallback() {
         @Override
-        public void onAdLoaded(@NonNull @NotNull RewardedAd rewardedAd) {
+        public void onAdLoaded(@NonNull RewardedAd rewardedAd) {
             super.onAdLoaded(rewardedAd);
             isLoaded = true;
             rewardedAd.setFullScreenContentCallback(fullScreenContentCallback);
@@ -53,7 +51,7 @@ public class RNAdMobRewardedVideoAdModule extends ReactContextBaseJavaModule {
         }
 
         @Override
-        public void onAdFailedToLoad(@NonNull @NotNull LoadAdError loadAdError) {
+        public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
             super.onAdFailedToLoad(loadAdError);
             isLoaded = false;
             String errorString = "ERROR_UNKNOWN";
@@ -87,7 +85,7 @@ public class RNAdMobRewardedVideoAdModule extends ReactContextBaseJavaModule {
 
     FullScreenContentCallback fullScreenContentCallback = new FullScreenContentCallback() {
         @Override
-        public void onAdFailedToShowFullScreenContent(@NonNull @NotNull AdError adError) {
+        public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
             super.onAdFailedToShowFullScreenContent(adError);
         }
 
@@ -124,7 +122,7 @@ public class RNAdMobRewardedVideoAdModule extends ReactContextBaseJavaModule {
     private Promise mRequestAdPromise;
 
     @Override
-    public @NotNull String getName() {
+    public @NonNull String getName() {
         return REACT_CLASS;
     }
 
@@ -155,9 +153,7 @@ public class RNAdMobRewardedVideoAdModule extends ReactContextBaseJavaModule {
             } else {
                 mRequestAdPromise = promise;
 
-                AdRequest.Builder adRequestBuilder = new AdRequest.Builder();
-
-                AdRequest adRequest = adRequestBuilder.build();
+                AdRequest adRequest = new AdRequest.Builder().build();
                 RewardedAd.load(getReactApplicationContext(), adUnitID, adRequest, rewardedAdLoadCallback);
             }
         });

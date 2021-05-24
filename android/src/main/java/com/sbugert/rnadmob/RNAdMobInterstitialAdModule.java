@@ -21,8 +21,6 @@ import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 
-import org.jetbrains.annotations.NotNull;
-
 public class RNAdMobInterstitialAdModule extends ReactContextBaseJavaModule {
 
     public static final String REACT_CLASS = "RNAdMobInterstitial";
@@ -51,7 +49,7 @@ public class RNAdMobInterstitialAdModule extends ReactContextBaseJavaModule {
     };
     InterstitialAdLoadCallback interstitialAdLoadCallback = new InterstitialAdLoadCallback() {
         @Override
-        public void onAdLoaded(@NonNull @NotNull InterstitialAd interstitialAd) {
+        public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
             super.onAdLoaded(interstitialAd);
             interstitialAd.setFullScreenContentCallback(fullScreenContentCallback);
             mInterstitialAd = interstitialAd;
@@ -62,7 +60,7 @@ public class RNAdMobInterstitialAdModule extends ReactContextBaseJavaModule {
         }
 
         @Override
-        public void onAdFailedToLoad(@NonNull @NotNull LoadAdError loadAdError) {
+        public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
             super.onAdFailedToLoad(loadAdError);
             isLoading = false;
             isLoaded = false; //TODO: ?
@@ -101,7 +99,7 @@ public class RNAdMobInterstitialAdModule extends ReactContextBaseJavaModule {
     private boolean isLoading = false;
 
     @Override
-    public @NotNull String getName() {
+    public @NonNull String getName() {
         return REACT_CLASS;
     }
 
@@ -130,8 +128,7 @@ public class RNAdMobInterstitialAdModule extends ReactContextBaseJavaModule {
                 promise.reject("E_AD_ALREADY_LOADED", "Ad is already loaded.");
             } else {
                 mRequestAdPromise = promise;
-                AdRequest.Builder adRequestBuilder = new AdRequest.Builder();
-                AdRequest adRequest = adRequestBuilder.build();
+                AdRequest adRequest = new AdRequest.Builder().build();
                 InterstitialAd.load(getReactApplicationContext(), adUnitID, adRequest, interstitialAdLoadCallback);
             }
         });

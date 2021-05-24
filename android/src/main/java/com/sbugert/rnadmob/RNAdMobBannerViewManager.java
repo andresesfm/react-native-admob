@@ -23,8 +23,6 @@ import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.LoadAdError;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Map;
 
 class ReactAdView extends ReactViewGroup {
@@ -58,7 +56,7 @@ class ReactAdView extends ReactViewGroup {
             }
 
             @Override
-            public void onAdFailedToLoad(@NonNull @NotNull LoadAdError loadAdError) {
+            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                 super.onAdFailedToLoad(loadAdError);
                 String errorMessage = "Unknown error";
                 switch (loadAdError.getCode()) {
@@ -125,9 +123,7 @@ class ReactAdView extends ReactViewGroup {
     }
 
     public void loadBanner() {
-        AdRequest.Builder adRequestBuilder = new AdRequest.Builder();
-
-        AdRequest adRequest = adRequestBuilder.build();
+        AdRequest adRequest = new AdRequest.Builder().build();
         this.adView.loadAd(adRequest);
     }
 
@@ -165,12 +161,12 @@ public class RNAdMobBannerViewManager extends ViewGroupManager<ReactAdView> {
     public static final int COMMAND_LOAD_BANNER = 1;
 
     @Override
-    public @NotNull String getName() {
+    public @NonNull String getName() {
         return REACT_CLASS;
     }
 
     @Override
-    protected @NotNull ReactAdView createViewInstance(ThemedReactContext themedReactContext) {
+    protected @NonNull ReactAdView createViewInstance(@NonNull ThemedReactContext themedReactContext) {
         ReactAdView adView = new ReactAdView(themedReactContext);
         return adView;
     }
@@ -244,7 +240,7 @@ public class RNAdMobBannerViewManager extends ViewGroupManager<ReactAdView> {
     }
 
     @Override
-    public void receiveCommand(@NotNull ReactAdView root, int commandId, ReadableArray args) {
+    public void receiveCommand(@NonNull ReactAdView root, int commandId, ReadableArray args) {
         switch (commandId) {
             case COMMAND_LOAD_BANNER:
                 root.loadBanner();

@@ -27,8 +27,6 @@ import com.google.android.gms.ads.admanager.AdManagerAdRequest;
 import com.google.android.gms.ads.admanager.AdManagerAdView;
 import com.google.android.gms.ads.admanager.AppEventListener;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -77,7 +75,7 @@ class ReactPublisherAdView extends ReactViewGroup {
             }
 
             @Override
-            public void onAdFailedToLoad(@NonNull @NotNull LoadAdError loadAdError) {
+            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                 super.onAdFailedToLoad(loadAdError);
                 String errorMessage = "Unknown error";
                 switch (loadAdError.getCode()) {
@@ -223,12 +221,12 @@ public class RNPublisherBannerViewManager extends ViewGroupManager<ReactPublishe
     public static final int COMMAND_LOAD_BANNER = 1;
 
     @Override
-    public @NotNull String getName() {
+    public @NonNull String getName() {
         return REACT_CLASS;
     }
 
     @Override
-    protected @NotNull ReactPublisherAdView createViewInstance(@NotNull ThemedReactContext themedReactContext) {
+    protected @NonNull ReactPublisherAdView createViewInstance(@NonNull ThemedReactContext themedReactContext) {
         return new ReactPublisherAdView(themedReactContext);
     }
 
