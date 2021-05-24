@@ -15,6 +15,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableNativeArray;
+import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.google.android.gms.ads.AdRequest;
@@ -71,7 +72,7 @@ public class RNAdMobInterstitialAdModule extends ReactContextBaseJavaModule {
         public void onAdFailedToLoad(@NonNull @NotNull LoadAdError loadAdError) {
             super.onAdFailedToLoad(loadAdError);
             isLoading=false;
-            isLoaded = false; //TODO
+            isLoaded = false; //TODO: ?
             String errorString = "ERROR_UNKNOWN";
             String errorMessage = "Unknown error";
             switch (loadAdError.getCode()) {
@@ -107,7 +108,7 @@ public class RNAdMobInterstitialAdModule extends ReactContextBaseJavaModule {
     private boolean isLoading=false;
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return REACT_CLASS;
     }
 
@@ -130,7 +131,7 @@ public class RNAdMobInterstitialAdModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void requestAd(final Promise promise) {
-        new Handler(Looper.getMainLooper()).post(() -> {
+        UiThreadUtil.runOnUiThread(() -> {
             if (isLoaded || isLoading) {
                 promise.reject("E_AD_ALREADY_LOADED", "Ad is already loaded.");
             } else {
@@ -144,11 +145,13 @@ public class RNAdMobInterstitialAdModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void showAd(final Promise promise) {
-        new Handler(Looper.getMainLooper()).post(() -> {
+        UiThreadUtil.runOnUiThread(() -> {
             Activity currentActivity = getCurrentActivity();
             if (isLoaded && currentActivity!= null) {
                 mInterstitialAd.show(currentActivity);
                 promise.resolve(null);
+                isLoaded=false;
+                isLoading=false;
             } else {
                 promise.reject("E_AD_NOT_READY", "Ad is not ready.");
             }
@@ -157,6 +160,6 @@ public class RNAdMobInterstitialAdModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void isReady(final Callback callback) {
-        new Handler(Looper.getMainLooper()).post(() -> callback.invoke(isLoaded));
+        UiThreadUtil.runOnUiThread(() -> callback.invoke(isLoaded));
     }
 }

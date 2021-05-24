@@ -15,6 +15,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableNativeArray;
+import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.google.android.gms.ads.AdError;
@@ -157,7 +158,7 @@ public class RNAdMobRewardedVideoAdModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void requestAd(final Promise promise) {
-        new Handler(Looper.getMainLooper()).post(() -> {
+        UiThreadUtil.runOnUiThread(() -> {
             if (isLoaded) {
                 promise.reject("E_AD_ALREADY_LOADED", "Ad is already loaded.");
             } else {
@@ -173,11 +174,13 @@ public class RNAdMobRewardedVideoAdModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void showAd(final Promise promise) {
-        new Handler(Looper.getMainLooper()).post(() -> {
+        UiThreadUtil.runOnUiThread(() -> {
             Activity currentActivity = getCurrentActivity();
             if (currentActivity!=null && isLoaded) {
                 mRewardedAd.show(currentActivity,onUserEarnedRewardListener);
                 promise.resolve(null);
+                isLoaded=false;
+
             } else {
                 promise.reject("E_AD_NOT_READY", "Ad is not ready.");
             }
@@ -186,6 +189,6 @@ public class RNAdMobRewardedVideoAdModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void isReady(final Callback callback) {
-        new Handler(Looper.getMainLooper()).post(() -> callback.invoke(isLoaded));
+        UiThreadUtil.runOnUiThread(() -> callback.invoke(isLoaded));
     }
 }
