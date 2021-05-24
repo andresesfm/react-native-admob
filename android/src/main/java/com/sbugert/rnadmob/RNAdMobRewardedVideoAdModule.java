@@ -131,7 +131,7 @@ public class RNAdMobRewardedVideoAdModule extends ReactContextBaseJavaModule {
     private Promise mRequestAdPromise;
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return REACT_CLASS;
     }
 
@@ -157,19 +157,16 @@ public class RNAdMobRewardedVideoAdModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void requestAd(final Promise promise) {
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-                if (isLoaded) {
-                    promise.reject("E_AD_ALREADY_LOADED", "Ad is already loaded.");
-                } else {
-                    mRequestAdPromise = promise;
+        new Handler(Looper.getMainLooper()).post(() -> {
+            if (isLoaded) {
+                promise.reject("E_AD_ALREADY_LOADED", "Ad is already loaded.");
+            } else {
+                mRequestAdPromise = promise;
 
-                    AdRequest.Builder adRequestBuilder = new AdRequest.Builder();
+                AdRequest.Builder adRequestBuilder = new AdRequest.Builder();
 
-                    AdRequest adRequest = adRequestBuilder.build();
-                    RewardedAd.load(getReactApplicationContext(),adUnitID, adRequest,rewardedAdLoadCallback);
-                }
+                AdRequest adRequest = adRequestBuilder.build();
+                RewardedAd.load(getReactApplicationContext(),adUnitID, adRequest,rewardedAdLoadCallback);
             }
         });
     }

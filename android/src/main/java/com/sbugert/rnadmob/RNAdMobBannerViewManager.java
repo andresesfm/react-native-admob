@@ -167,12 +167,12 @@ public class RNAdMobBannerViewManager extends ViewGroupManager<ReactAdView> {
     public static final int COMMAND_LOAD_BANNER = 1;
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return REACT_CLASS;
     }
 
     @Override
-    protected ReactAdView createViewInstance(ThemedReactContext themedReactContext) {
+    protected @NotNull ReactAdView createViewInstance(ThemedReactContext themedReactContext) {
         ReactAdView adView = new ReactAdView(themedReactContext);
         return adView;
     }
@@ -194,8 +194,8 @@ public class RNAdMobBannerViewManager extends ViewGroupManager<ReactAdView> {
             EVENT_AD_CLOSED,
             EVENT_AD_LEFT_APPLICATION
         };
-        for (int i = 0; i < events.length; i++) {
-            builder.put(events[i], MapBuilder.of("registrationName", events[i]));
+        for (String event : events) {
+            builder.put(event, MapBuilder.of("registrationName", event));
         }
         return builder.build();
     }
@@ -246,7 +246,7 @@ public class RNAdMobBannerViewManager extends ViewGroupManager<ReactAdView> {
     }
 
     @Override
-    public void receiveCommand(ReactAdView root, int commandId, @javax.annotation.Nullable ReadableArray args) {
+    public void receiveCommand(@NotNull ReactAdView root, int commandId, ReadableArray args) {
         switch (commandId) {
             case COMMAND_LOAD_BANNER:
                 root.loadBanner();
