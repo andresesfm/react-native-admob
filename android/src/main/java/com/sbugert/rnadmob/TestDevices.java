@@ -9,9 +9,9 @@ import com.google.android.gms.ads.RequestConfiguration;
 import java.util.ArrayList;
 
 public class TestDevices {
-    static void set(ReadableArray testDevicesArray){
-        ReadableNativeArray nativeArray = (ReadableNativeArray)testDevicesArray;
-        ArrayList<String> testDevices  =new ArrayList<>();
+    static void set(ReadableArray testDevicesArray) {
+        ReadableNativeArray nativeArray = (ReadableNativeArray) testDevicesArray;
+        ArrayList<String> testDevices = new ArrayList<>();
         for (int i = 0; i < nativeArray.size(); i++) {
             String testDevice = testDevicesArray.getString(i);
             if (testDevice.equals("EMULATOR") || testDevice.equals("SIMULATOR")) {

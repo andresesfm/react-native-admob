@@ -1,8 +1,6 @@
 package com.sbugert.rnadmob;
 
 import android.app.Activity;
-import android.os.Handler;
-import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,24 +12,18 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
-import com.facebook.react.bridge.ReadableNativeArray;
 import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.google.android.gms.ads.AdError;
+import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.MobileAds;
-
-import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.OnUserEarnedRewardListener;
-import com.google.android.gms.ads.RequestConfiguration;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 
 import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
 
 public class RNAdMobRewardedVideoAdModule extends ReactContextBaseJavaModule {
 
@@ -53,9 +45,9 @@ public class RNAdMobRewardedVideoAdModule extends ReactContextBaseJavaModule {
         @Override
         public void onAdLoaded(@NonNull @NotNull RewardedAd rewardedAd) {
             super.onAdLoaded(rewardedAd);
-            isLoaded=true;
+            isLoaded = true;
             rewardedAd.setFullScreenContentCallback(fullScreenContentCallback);
-            mRewardedAd=rewardedAd;
+            mRewardedAd = rewardedAd;
             sendEvent(EVENT_AD_LOADED, null);
             mRequestAdPromise.resolve(null);
         }
@@ -63,7 +55,7 @@ public class RNAdMobRewardedVideoAdModule extends ReactContextBaseJavaModule {
         @Override
         public void onAdFailedToLoad(@NonNull @NotNull LoadAdError loadAdError) {
             super.onAdFailedToLoad(loadAdError);
-            isLoaded=false;
+            isLoaded = false;
             String errorString = "ERROR_UNKNOWN";
             String errorMessage = "Unknown error";
             switch (loadAdError.getCode()) {
@@ -141,7 +133,6 @@ public class RNAdMobRewardedVideoAdModule extends ReactContextBaseJavaModule {
     }
 
 
-
     private void sendEvent(String eventName, @Nullable WritableMap params) {
         getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);
     }
@@ -167,7 +158,7 @@ public class RNAdMobRewardedVideoAdModule extends ReactContextBaseJavaModule {
                 AdRequest.Builder adRequestBuilder = new AdRequest.Builder();
 
                 AdRequest adRequest = adRequestBuilder.build();
-                RewardedAd.load(getReactApplicationContext(),adUnitID, adRequest,rewardedAdLoadCallback);
+                RewardedAd.load(getReactApplicationContext(), adUnitID, adRequest, rewardedAdLoadCallback);
             }
         });
     }
@@ -176,10 +167,10 @@ public class RNAdMobRewardedVideoAdModule extends ReactContextBaseJavaModule {
     public void showAd(final Promise promise) {
         UiThreadUtil.runOnUiThread(() -> {
             Activity currentActivity = getCurrentActivity();
-            if (currentActivity!=null && isLoaded) {
-                mRewardedAd.show(currentActivity,onUserEarnedRewardListener);
+            if (currentActivity != null && isLoaded) {
+                mRewardedAd.show(currentActivity, onUserEarnedRewardListener);
                 promise.resolve(null);
-                isLoaded=false;
+                isLoaded = false;
 
             } else {
                 promise.reject("E_AD_NOT_READY", "Ad is not ready.");

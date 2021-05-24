@@ -1,8 +1,6 @@
 package com.sbugert.rnadmob;
 
 import android.app.Activity;
-import android.os.Handler;
-import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,21 +12,16 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
-import com.facebook.react.bridge.ReadableNativeArray;
 import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.RequestConfiguration;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 
 import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
 
 public class RNAdMobInterstitialAdModule extends ReactContextBaseJavaModule {
 
@@ -62,7 +55,7 @@ public class RNAdMobInterstitialAdModule extends ReactContextBaseJavaModule {
             super.onAdLoaded(interstitialAd);
             interstitialAd.setFullScreenContentCallback(fullScreenContentCallback);
             mInterstitialAd = interstitialAd;
-            isLoading=false;
+            isLoading = false;
             isLoaded = true;
             sendEvent(EVENT_AD_LOADED, null);
             mRequestAdPromise.resolve(null);
@@ -71,7 +64,7 @@ public class RNAdMobInterstitialAdModule extends ReactContextBaseJavaModule {
         @Override
         public void onAdFailedToLoad(@NonNull @NotNull LoadAdError loadAdError) {
             super.onAdFailedToLoad(loadAdError);
-            isLoading=false;
+            isLoading = false;
             isLoaded = false; //TODO: ?
             String errorString = "ERROR_UNKNOWN";
             String errorMessage = "Unknown error";
@@ -104,8 +97,8 @@ public class RNAdMobInterstitialAdModule extends ReactContextBaseJavaModule {
 
     private Promise mRequestAdPromise;
     private String adUnitID;
-    private boolean isLoaded=false;
-    private boolean isLoading=false;
+    private boolean isLoaded = false;
+    private boolean isLoading = false;
 
     @Override
     public @NotNull String getName() {
@@ -115,6 +108,7 @@ public class RNAdMobInterstitialAdModule extends ReactContextBaseJavaModule {
     public RNAdMobInterstitialAdModule(ReactApplicationContext reactContext) {
         super(reactContext);
     }
+
     private void sendEvent(String eventName, @Nullable WritableMap params) {
         getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);
     }
@@ -138,7 +132,7 @@ public class RNAdMobInterstitialAdModule extends ReactContextBaseJavaModule {
                 mRequestAdPromise = promise;
                 AdRequest.Builder adRequestBuilder = new AdRequest.Builder();
                 AdRequest adRequest = adRequestBuilder.build();
-                InterstitialAd.load(getReactApplicationContext(),adUnitID,adRequest,interstitialAdLoadCallback);
+                InterstitialAd.load(getReactApplicationContext(), adUnitID, adRequest, interstitialAdLoadCallback);
             }
         });
     }
@@ -147,11 +141,11 @@ public class RNAdMobInterstitialAdModule extends ReactContextBaseJavaModule {
     public void showAd(final Promise promise) {
         UiThreadUtil.runOnUiThread(() -> {
             Activity currentActivity = getCurrentActivity();
-            if (isLoaded && currentActivity!= null) {
+            if (isLoaded && currentActivity != null) {
                 mInterstitialAd.show(currentActivity);
                 promise.resolve(null);
-                isLoaded=false;
-                isLoading=false;
+                isLoaded = false;
+                isLoading = false;
             } else {
                 promise.reject("E_AD_NOT_READY", "Ad is not ready.");
             }
