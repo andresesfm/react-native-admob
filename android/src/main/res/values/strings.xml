@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">ReactNativeAdMob</string>
+    <string name="admob_unknown_error">Unknown error</string>
+    <string name="admob_internal_error">Internal error, an invalid response was received from the ad server.</string>
+    <string name="admob_invalid_error">Invalid ad request, possibly an incorrect ad unit ID was given.</string>
+    <string name="admob_network_error">The ad request was unsuccessful due to network connectivity.</string>
+    <string name="admob_no_fill">The ad request was successful, but no ad was returned due to lack of ad inventory.</string>
 </resources>

@@ -1,8 +1,10 @@
 package com.sbugert.rnadmob;
 
 import android.content.Context;
-import androidx.annotation.Nullable;
 import android.view.View;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
@@ -20,24 +22,31 @@ import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.facebook.react.views.view.ReactViewGroup;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdSize;
-import com.google.android.gms.ads.doubleclick.AppEventListener;
-import com.google.android.gms.ads.doubleclick.PublisherAdRequest;
-import com.google.android.gms.ads.doubleclick.PublisherAdView;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.admanager.AdManagerAdRequest;
+import com.google.android.gms.ads.admanager.AdManagerAdView;
+import com.google.android.gms.ads.admanager.AppEventListener;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 
 import timber.log.Timber;
 
-class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
+class ReactPublisherAdView extends ReactViewGroup {
 
-    protected PublisherAdView adView;
+    protected AdManagerAdView adView;
 
-    String[] testDevices;
     AdSize[] validAdSizes;
     String adUnitID;
     AdSize adSize;
     Map<String, Object> customTargeting;
+    AppEventListener appEventListener = (name, info) -> {
+        WritableMap event = Arguments.createMap();
+        event.putString("name", name);
+        event.putString("info", info);
+        sendEvent(RNPublisherBannerViewManager.EVENT_APP_EVENT, event);
+    };
 
     public ReactPublisherAdView(final Context context) {
         super(context);
@@ -48,13 +57,15 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
         if (this.adView != null) this.adView.destroy();
 
         final Context context = getContext();
-        this.adView = new PublisherAdView(context);
-        this.adView.setAppEventListener(this);
+        this.adView = new AdManagerAdView(context);
+
+        this.adView.setAppEventListener(appEventListener);
         this.adView.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {
-                int width = adView.getAdSize().getWidthInPixels(context);
-                int height = adView.getAdSize().getHeightInPixels(context);
+                AdSize adSize = adView.getAdSize();
+                int width = adSize.getWidthInPixels(context);
+                int height = adSize.getHeightInPixels(context);
                 int left = adView.getLeft();
                 int top = adView.getTop();
                 adView.measure(width, height);
@@ -64,26 +75,10 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
             }
 
             @Override
-            public void onAdFailedToLoad(int errorCode) {
-                String errorMessage = "Unknown error";
-                switch (errorCode) {
-                    case PublisherAdRequest.ERROR_CODE_INTERNAL_ERROR:
-                        errorMessage = "Internal error, an invalid response was received from the ad server.";
-                        break;
-                    case PublisherAdRequest.ERROR_CODE_INVALID_REQUEST:
-                        errorMessage = "Invalid ad request, possibly an incorrect ad unit ID was given.";
-                        break;
-                    case PublisherAdRequest.ERROR_CODE_NETWORK_ERROR:
-                        errorMessage = "The ad request was unsuccessful due to network connectivity.";
-                        break;
-                    case PublisherAdRequest.ERROR_CODE_NO_FILL:
-                        errorMessage = "The ad request was successful, but no ad was returned due to lack of ad inventory.";
-                        break;
-                }
-                WritableMap event = Arguments.createMap();
-                WritableMap error = Arguments.createMap();
-                error.putString("message", errorMessage);
-                event.putMap("error", error);
+            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                super.onAdFailedToLoad(loadAdError);
+
+                WritableMap event = ErrorHandler.getErrorEvent(context,loadAdError);
                 sendEvent(RNPublisherBannerViewManager.EVENT_AD_FAILED_TO_LOAD, event);
             }
 
@@ -97,10 +92,8 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
                 sendEvent(RNPublisherBannerViewManager.EVENT_AD_CLOSED, null);
             }
 
-            @Override
-            public void onAdLeftApplication() {
-                sendEvent(RNPublisherBannerViewManager.EVENT_AD_LEFT_APPLICATION, null);
-            }
+            //sendEvent(RNPublisherBannerViewManager.EVENT_AD_LEFT_APPLICATION, null);
+
         });
         this.addView(this.adView);
     }
@@ -126,9 +119,9 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
     private void sendEvent(String name, @Nullable WritableMap event) {
         ReactContext reactContext = (ReactContext) getContext();
         reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
-                getId(),
-                name,
-                event);
+            getId(),
+            name,
+            event);
     }
 
     public void loadBanner() {
@@ -137,9 +130,7 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
             adSizes.add(this.adSize);
         }
         if (this.validAdSizes != null) {
-            for (int i = 0; i < this.validAdSizes.length; i++) {
-                adSizes.add(this.validAdSizes[i]);
-            }
+            adSizes.addAll(Arrays.asList(this.validAdSizes));
         }
 
         String slot = null;
@@ -154,25 +145,17 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
             adSizes.add(AdSize.BANNER);
         }
 
-        AdSize[] adSizesArray = adSizes.toArray(new AdSize[adSizes.size()]);
+        AdSize[] adSizesArray = adSizes.toArray(new AdSize[0]);
         this.adView.setAdSizes(adSizesArray);
 
-        PublisherAdRequest.Builder adRequestBuilder = new PublisherAdRequest.Builder();
-        if (testDevices != null) {
-            for (int i = 0; i < testDevices.length; i++) {
-                String testDevice = testDevices[i];
-                if (testDevice == "SIMULATOR") {
-                    testDevice = PublisherAdRequest.DEVICE_ID_EMULATOR;
-                }
-                adRequestBuilder.addTestDevice(testDevice);
-            }
-        }
+        AdManagerAdRequest.Builder adRequestBuilder = new AdManagerAdRequest.Builder();
+
         if (customTargeting != null) {
             for (String key : customTargeting.keySet()) {
                 adRequestBuilder.addCustomTargeting(key, String.valueOf(customTargeting.get(key)));
             }
         }
-        PublisherAdRequest adRequest = adRequestBuilder.build();
+        AdManagerAdRequest adRequest = adRequestBuilder.build();
         this.adView.loadAd(adRequest);
     }
 
@@ -184,10 +167,6 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
         }
         this.adUnitID = adUnitID;
         this.adView.setAdUnitId(adUnitID);
-    }
-
-    public void setTestDevices(String[] testDevices) {
-        this.testDevices = testDevices;
     }
 
     public void setAdSize(AdSize adSize) {
@@ -202,13 +181,6 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
         this.customTargeting = customTargeting;
     }
 
-    @Override
-    public void onAppEvent(String name, String info) {
-        WritableMap event = Arguments.createMap();
-        event.putString("name", name);
-        event.putString("info", info);
-        sendEvent(RNPublisherBannerViewManager.EVENT_APP_EVENT, event);
-    }
 }
 
 public class RNPublisherBannerViewManager extends ViewGroupManager<ReactPublisherAdView> {
@@ -232,14 +204,13 @@ public class RNPublisherBannerViewManager extends ViewGroupManager<ReactPublishe
     public static final int COMMAND_LOAD_BANNER = 1;
 
     @Override
-    public String getName() {
+    public @NonNull String getName() {
         return REACT_CLASS;
     }
 
     @Override
-    protected ReactPublisherAdView createViewInstance(ThemedReactContext themedReactContext) {
-        ReactPublisherAdView adView = new ReactPublisherAdView(themedReactContext);
-        return adView;
+    protected @NonNull ReactPublisherAdView createViewInstance(@NonNull ThemedReactContext themedReactContext) {
+        return new ReactPublisherAdView(themedReactContext);
     }
 
     @Override
@@ -252,16 +223,16 @@ public class RNPublisherBannerViewManager extends ViewGroupManager<ReactPublishe
     public Map<String, Object> getExportedCustomDirectEventTypeConstants() {
         MapBuilder.Builder<String, Object> builder = MapBuilder.builder();
         String[] events = {
-                EVENT_SIZE_CHANGE,
-                EVENT_AD_LOADED,
-                EVENT_AD_FAILED_TO_LOAD,
-                EVENT_AD_OPENED,
-                EVENT_AD_CLOSED,
-                EVENT_AD_LEFT_APPLICATION,
-                EVENT_APP_EVENT
+            EVENT_SIZE_CHANGE,
+            EVENT_AD_LOADED,
+            EVENT_AD_FAILED_TO_LOAD,
+            EVENT_AD_OPENED,
+            EVENT_AD_CLOSED,
+            EVENT_AD_LEFT_APPLICATION,
+            EVENT_APP_EVENT
         };
-        for (int i = 0; i < events.length; i++) {
-            builder.put(events[i], MapBuilder.of("registrationName", events[i]));
+        for (String event : events) {
+            builder.put(event, MapBuilder.of("registrationName", event));
         }
         return builder.build();
     }
@@ -296,10 +267,7 @@ public class RNPublisherBannerViewManager extends ViewGroupManager<ReactPublishe
 
     @ReactProp(name = PROP_TEST_DEVICES)
     public void setPropTestDevices(final ReactPublisherAdView view, final ReadableArray testDevices) {
-        Timber.v("setPropTestDevices for view " + view.hashCode() + ": " + testDevices);
-        ReadableNativeArray nativeArray = (ReadableNativeArray) testDevices;
-        ArrayList<Object> list = nativeArray.toArrayList();
-        view.setTestDevices(list.toArray(new String[list.size()]));
+        TestDevices.set(testDevices);
     }
 
     @ReactProp(name = PROP_CUSTOM_TARGETING)

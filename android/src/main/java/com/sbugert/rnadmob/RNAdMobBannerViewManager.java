@@ -1,27 +1,28 @@
 package com.sbugert.rnadmob;
 
 import android.content.Context;
-import androidx.annotation.Nullable;
 import android.view.View;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
-import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.ReadableArray;
-import com.facebook.react.bridge.ReadableNativeArray;
+import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.PixelUtil;
+import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
-import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.facebook.react.views.view.ReactViewGroup;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.LoadAdError;
 
-import java.util.ArrayList;
 import java.util.Map;
 
 class ReactAdView extends ReactViewGroup {
@@ -29,7 +30,6 @@ class ReactAdView extends ReactViewGroup {
     protected AdView adView;
 
     String adUnitID;
-    String[] testDevices;
     AdSize adSize;
 
     public ReactAdView(final Context context) {
@@ -56,26 +56,10 @@ class ReactAdView extends ReactViewGroup {
             }
 
             @Override
-            public void onAdFailedToLoad(int errorCode) {
-                String errorMessage = "Unknown error";
-                switch (errorCode) {
-                    case AdRequest.ERROR_CODE_INTERNAL_ERROR:
-                        errorMessage = "Internal error, an invalid response was received from the ad server.";
-                        break;
-                    case AdRequest.ERROR_CODE_INVALID_REQUEST:
-                        errorMessage = "Invalid ad request, possibly an incorrect ad unit ID was given.";
-                        break;
-                    case AdRequest.ERROR_CODE_NETWORK_ERROR:
-                        errorMessage = "The ad request was unsuccessful due to network connectivity.";
-                        break;
-                    case AdRequest.ERROR_CODE_NO_FILL:
-                        errorMessage = "The ad request was successful, but no ad was returned due to lack of ad inventory.";
-                        break;
-                }
-                WritableMap event = Arguments.createMap();
-                WritableMap error = Arguments.createMap();
-                error.putString("message", errorMessage);
-                event.putMap("error", error);
+            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                super.onAdFailedToLoad(loadAdError);
+
+                WritableMap event = ErrorHandler.getErrorEvent(context,loadAdError);
                 sendEvent(RNAdMobBannerViewManager.EVENT_AD_FAILED_TO_LOAD, event);
             }
 
@@ -89,10 +73,8 @@ class ReactAdView extends ReactViewGroup {
                 sendEvent(RNAdMobBannerViewManager.EVENT_AD_CLOSED, null);
             }
 
-            @Override
-            public void onAdLeftApplication() {
-                sendEvent(RNAdMobBannerViewManager.EVENT_AD_LEFT_APPLICATION, null);
-            }
+            //TODO: sendEvent(RNAdMobBannerViewManager.EVENT_AD_LEFT_APPLICATION, null);
+
         });
         this.addView(this.adView);
     }
@@ -118,23 +100,13 @@ class ReactAdView extends ReactViewGroup {
     private void sendEvent(String name, @Nullable WritableMap event) {
         ReactContext reactContext = (ReactContext) getContext();
         reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
-                        getId(),
-                        name,
-                        event);
+            getId(),
+            name,
+            event);
     }
 
     public void loadBanner() {
-        AdRequest.Builder adRequestBuilder = new AdRequest.Builder();
-        if (testDevices != null) {
-            for (int i = 0; i < testDevices.length; i++) {
-                String testDevice = testDevices[i];
-                if (testDevice == "SIMULATOR") {
-                    testDevice = AdRequest.DEVICE_ID_EMULATOR;
-                }
-                adRequestBuilder.addTestDevice(testDevice);
-            }
-        }
-        AdRequest adRequest = adRequestBuilder.build();
+        AdRequest adRequest = new AdRequest.Builder().build();
         this.adView.loadAd(adRequest);
     }
 
@@ -146,10 +118,6 @@ class ReactAdView extends ReactViewGroup {
         }
         this.adUnitID = adUnitID;
         this.adView.setAdUnitId(adUnitID);
-    }
-
-    public void setTestDevices(String[] testDevices) {
-        this.testDevices = testDevices;
     }
 
     public void setAdSize(AdSize adSize) {
@@ -176,12 +144,12 @@ public class RNAdMobBannerViewManager extends ViewGroupManager<ReactAdView> {
     public static final int COMMAND_LOAD_BANNER = 1;
 
     @Override
-    public String getName() {
+    public @NonNull String getName() {
         return REACT_CLASS;
     }
 
     @Override
-    protected ReactAdView createViewInstance(ThemedReactContext themedReactContext) {
+    protected @NonNull ReactAdView createViewInstance(@NonNull ThemedReactContext themedReactContext) {
         ReactAdView adView = new ReactAdView(themedReactContext);
         return adView;
     }
@@ -203,8 +171,8 @@ public class RNAdMobBannerViewManager extends ViewGroupManager<ReactAdView> {
             EVENT_AD_CLOSED,
             EVENT_AD_LEFT_APPLICATION
         };
-        for (int i = 0; i < events.length; i++) {
-            builder.put(events[i], MapBuilder.of("registrationName", events[i]));
+        for (String event : events) {
+            builder.put(event, MapBuilder.of("registrationName", event));
         }
         return builder.build();
     }
@@ -222,9 +190,7 @@ public class RNAdMobBannerViewManager extends ViewGroupManager<ReactAdView> {
 
     @ReactProp(name = PROP_TEST_DEVICES)
     public void setPropTestDevices(final ReactAdView view, final ReadableArray testDevices) {
-        ReadableNativeArray nativeArray = (ReadableNativeArray)testDevices;
-        ArrayList<Object> list = nativeArray.toArrayList();
-        view.setTestDevices(list.toArray(new String[list.size()]));
+        TestDevices.set(testDevices);
     }
 
     private AdSize getAdSizeFromString(String adSize) {
@@ -257,7 +223,7 @@ public class RNAdMobBannerViewManager extends ViewGroupManager<ReactAdView> {
     }
 
     @Override
-    public void receiveCommand(ReactAdView root, int commandId, @javax.annotation.Nullable ReadableArray args) {
+    public void receiveCommand(@NonNull ReactAdView root, int commandId, ReadableArray args) {
         switch (commandId) {
             case COMMAND_LOAD_BANNER:
                 root.loadBanner();

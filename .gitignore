@@ -61,9 +61,8 @@ node_modules/**/*
 android/.idea/
 android/android.iml
 android/RNAdMob.iml
-android/gradle/
-android/gradlew
-android/gradlew.bat
+android/.gradle/
+
 android/local.properties
 Example/android/Example.iml
 Example/android/app/app.iml

@@ -149,6 +149,7 @@ export default class Example extends Component {
               adSize="banner"
               validAdSizes={['banner', 'largeBanner', 'mediumRectangle']}
               adUnitID="/6499/example/APIDemo/AdSizes"
+              testDevices={[PublisherBanner.simulatorId]}
               ref={el => (this._adSizesExample = el)}
             />
             <Button
@@ -160,6 +161,7 @@ export default class Example extends Component {
             <PublisherBanner
               style={{ height: 50 }}
               adUnitID="/6499/example/APIDemo/AppEvents"
+              testDevices={[PublisherBanner.simulatorId]}
               onAdFailedToLoad={(error) => console.warn(error)}
               onAppEvent={(event) => {
                 if (event.name === 'color') {
@@ -186,6 +188,7 @@ export default class Example extends Component {
               <PublisherBanner
                 adSize="fluid"
                 adUnitID="/6499/example/APIDemo/Fluid"
+                testDevices={[PublisherBanner.simulatorId]}
                 ref={el => (this._appFluidAdSizeExample = el)}
                 style={{ flex: 1 }}
               />
