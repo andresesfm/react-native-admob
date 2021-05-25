@@ -54,31 +54,10 @@ public class RNAdMobRewardedVideoAdModule extends ReactContextBaseJavaModule {
         public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
             super.onAdFailedToLoad(loadAdError);
             isLoaded = false;
-            String errorString = "ERROR_UNKNOWN";
-            String errorMessage = "Unknown error";
-            switch (loadAdError.getCode()) {
-                case AdRequest.ERROR_CODE_INTERNAL_ERROR:
-                    errorString = "ERROR_CODE_INTERNAL_ERROR";
-                    errorMessage = "Internal error, an invalid response was received from the ad server.";
-                    break;
-                case AdRequest.ERROR_CODE_INVALID_REQUEST:
-                    errorString = "ERROR_CODE_INVALID_REQUEST";
-                    errorMessage = "Invalid ad request, possibly an incorrect ad unit ID was given.";
-                    break;
-                case AdRequest.ERROR_CODE_NETWORK_ERROR:
-                    errorString = "ERROR_CODE_NETWORK_ERROR";
-                    errorMessage = "The ad request was unsuccessful due to network connectivity.";
-                    break;
-                case AdRequest.ERROR_CODE_NO_FILL:
-                    errorString = "ERROR_CODE_NO_FILL";
-                    errorMessage = "The ad request was successful, but no ad was returned due to lack of ad inventory.";
-                    break;
-            }
-            WritableMap event = Arguments.createMap();
-            WritableMap error = Arguments.createMap();
-            event.putString("message", errorMessage);
+
+            WritableMap event = ErrorHandler.getErrorEvent(getReactApplicationContext(),loadAdError);
             sendEvent(EVENT_AD_FAILED_TO_LOAD, event);
-            mRequestAdPromise.reject(errorString, errorMessage);
+            mRequestAdPromise.reject(event.getString("error"), event.getString("message"));
         }
 
     };
