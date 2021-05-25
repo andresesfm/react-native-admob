@@ -65,7 +65,7 @@ public class RNAdMobInterstitialAdModule extends ReactContextBaseJavaModule {
             isLoaded = false; //TODO: ?
             WritableMap event = ErrorHandler.getErrorEvent(getReactApplicationContext(),loadAdError);
             sendEvent(EVENT_AD_FAILED_TO_LOAD, event);
-            mRequestAdPromise.reject(event.getString("error"), event.getString("message"));
+            mRequestAdPromise.reject(event.getString("code"), event.getString("message"));
         }
     };
 
